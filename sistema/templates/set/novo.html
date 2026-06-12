@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="row justify-content-center">
+  <div class="col-lg-6">
+
+    <h2 class="dvk-page-title mb-4">Novo Set</h2>
+
+    <form method="POST" class="dvk-form">
+      {% csrf_token %}
+      {% for field in form %}
+      <div class="form-group mb-3">
+        <label class="dvk-label">{{ field.label }}</label>
+        {{ field }}
+        {% if field.errors %}
+        <ul class="errorlist">{% for e in field.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
+      {% endfor %}
+      <button type="submit" class="btn dvk-btn-primary mt-2">Salvar Set</button>
+      <a href="{% url 'listar-sets' %}" class="btn btn-link dvk-link mt-2 ml-2">Cancelar</a>
+    </form>
+
+  </div>
+</div>
+
+{% endblock %}

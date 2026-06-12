@@ -1,55 +1,73 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-    
 {% load static %}
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aluguel de Carros</title>
+    <title>Deep&amp;Vodka® — Eventos</title>
+    <link rel="icon" href="{% static 'assets/dpvk.png' %}" type="image/png">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="{% static 'css/app.css' %}">
 </head>
-
 <body>
-    <header class="bg-primary text-white text-center py-3">
-        <a href="{% url 'listar-veiculos' %}" class="text-white text-decoration-none">
-            <h1>Cars View</h1>
+
+    <nav class="navbar navbar-dark navbar-expand-lg dvk-navbar">
+        <a class="navbar-brand dvk-brand" href="{% url 'listar-eventos' %}">
+            DEEP<span class="dvk-red">&amp;</span>VODKA<sup>®</sup>
         </a>
-        <nav class="navbar navbar-expand-lg navbar-light bg-light ml-5 mr-5">
-            <div class="container">
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
-                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
-                    <ul class="navbar-nav">
-                        <li>
-                            <a class="nav-link" href="{% url 'listar-veiculos' %}">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'criar-veiculos' %}">Criar veiculo </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href=>Deletar Veiculo</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-    </header>
-    
-    <div class="container mt-4">
-        <div class="row"  style="height: auto;"> 
-            {% block content %}
-            <!-- Aqui serão renderizados os blocos de veículos -->
-            {% endblock %}
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto align-items-center">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'listar-eventos' %}">Eventos</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'listar-sets' %}">Sets</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'sobre' %}">Sobre Nós</a>
+                </li>
+                {% if user.is_authenticated %}
+                <li class="nav-item ml-2">
+                    <a class="nav-link dvk-nav-logout" href="{% url 'logout' %}">Sair</a>
+                </li>
+                {% else %}
+                <li class="nav-item ml-2">
+                    <a class="nav-link dvk-nav-logout" href="{% url 'login' %}">Login</a>
+                </li>
+                {% endif %}
+            </ul>
         </div>
-    </div>
+    </nav>
+
+    <main class="container mt-4 mb-5">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="dvk-footer">
+        <div class="dvk-footer-social">
+            <a href="https://www.instagram.com/deepevodka?igsh=MXgydzJ3ajk1Y2U2Zg" target="_blank" rel="noopener noreferrer" title="Instagram">
+                <i class="fa-brands fa-instagram"></i>
+            </a>
+            <a href="https://soundcloud.com/deepevodka" target="_blank" rel="noopener noreferrer" title="SoundCloud">
+                <i class="fa-brands fa-soundcloud"></i>
+            </a>
+            <a href="https://youtube.com/@deepevodka?si=I7nc4bEGvVEhkrc-" target="_blank" rel="noopener noreferrer" title="YouTube">
+                <i class="fa-brands fa-youtube"></i>
+            </a>
+            <a href="https://open.spotify.com/user/m8x82qrpiyhxl0s7g5nj6sf4u?si=e6773df2d9fd4daa" target="_blank" rel="noopener noreferrer" title="Spotify">
+                <i class="fa-brands fa-spotify"></i>
+            </a>
+        </div>
+        <span>DEEP<span class="dvk-red">&amp;</span>VODKA® — Todos os direitos reservados</span>
+    </footer>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
-
 </html>

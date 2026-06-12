@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+{% if evento.banner %}
+<img src="{% url 'banner-evento' evento.banner.name|cut:'eventos/banners/' %}"
+     class="dvk-event-banner mb-4" alt="{{ evento.nome }}">
+{% endif %}
+
+<div class="row">
+    <div class="col-lg-8">
+        <h1 class="dvk-page-title">{{ evento.nome }}</h1>
+
+        <div class="dvk-event-meta dvk-meta-block mb-4">
+            <div><strong>Data</strong> {{ evento.data|date:"d/m/Y" }}</div>
+            <div><strong>Horário</strong> {{ evento.hora|time:"H:i" }}</div>
+            <div><strong>Local</strong> {{ evento.local }}</div>
+            {% if evento.capacidade %}
+            <div><strong>Capacidade</strong> {{ evento.capacidade }} pessoas</div>
+            {% endif %}
+        </div>
+
+        {% if evento.descricao %}
+        <div class="dvk-descricao mb-4">
+            <div class="dvk-section-label">Sobre o evento</div>
+            <p>{{ evento.descricao }}</p>
+        </div>
+        {% endif %}
+
+        <div class="dvk-actions">
+            {% if evento.link_ingresso %}
+            <a href="{{ evento.link_ingresso }}" target="_blank" rel="noopener noreferrer"
+               class="btn dvk-btn-primary">Comprar Ingresso</a>
+            {% endif %}
+            <a href="{% url 'listar-eventos' %}" class="btn dvk-btn-outline">← Voltar</a>
+            {% if user.is_staff %}
+            <a href="{% url 'editar-evento' evento.id %}" class="btn dvk-btn-outline">Editar</a>
+            <a href="{% url 'excluir-evento' evento.id %}" class="btn dvk-btn-danger">Excluir</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

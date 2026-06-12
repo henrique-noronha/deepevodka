@@ -1,24 +1,47 @@
 from django.db import models
-from veiculos.consts import *
-from datetime import datetime
+from django.core.exceptions import ValidationError
 
-class Veiculo(models.Model):
-    marca = models.SmallIntegerField(choices=OPCOES_MARCAS)  
-    modelo = models.CharField(max_length=100)
-    ano = models.IntegerField()
-    cor = models.SmallIntegerField(choices=OPCOES_CORES)  
-    foto = models.ImageField(blank=True, null=True, upload_to='veiculos/fotos/')
-    combustivel = models.SmallIntegerField(choices=OPCOES_COMBUSTIVEIS)  
-# Create your models here.
-    @property
-    def veiculo_novo(self):
-        """
-        Verifica se o veículo é novo ou usado. retornando True se o veículo for novo (ano atual) e False caso contrário.
-        property é util porque nao salva os dados no DB, apenas retorna o valor.
-        """
-        return self.ano == datetime.now().year
-    def anos_de_uso(self):
-        """
-        Retorna a quantidade de anos que o veículo está em uso.
-        """
-        return datetime.now().year - self.ano #retorna a diferenaca entre ano dos veiculos gg
+
+def validate_tamanho_banner(banner):
+    limite = 5 * 1024 * 1024  # 5MB
+    if banner.size > limite:
+        raise ValidationError('Banner muito grande. O limite é 5MB.')
+
+
+class SetMusical(models.Model):
+    YOUTUBE = 'youtube'
+    SOUNDCLOUD = 'soundcloud'
+    TIPO_CHOICES = [
+        (YOUTUBE, 'YouTube'),
+        (SOUNDCLOUD, 'SoundCloud'),
+    ]
+    nome = models.CharField(max_length=200)
+    url = models.URLField()
+    tipo = models.CharField(max_length=20, choices=TIPO_CHOICES)
+    descricao = models.TextField(blank=True)
+    data = models.DateField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-data', 'nome']
+        verbose_name = 'Set'
+        verbose_name_plural = 'Sets'
+
+    def __str__(self):
+        return f"{self.nome} ({self.get_tipo_display()})"
+
+
+class Evento(models.Model):
+    nome = models.CharField(max_length=200)
+    data = models.DateField()
+    hora = models.TimeField()
+    local = models.CharField(max_length=200)
+    banner = models.ImageField(blank=True, null=True, upload_to='eventos/banners/', validators=[validate_tamanho_banner])
+    descricao = models.TextField(blank=True)
+    capacidade = models.IntegerField(null=True, blank=True)
+    link_ingresso = models.URLField(blank=True, null=True)
+
+    class Meta:
+        ordering = ['data', 'hora']
+
+    def __str__(self):
+        return f"{self.nome} - {self.data}"

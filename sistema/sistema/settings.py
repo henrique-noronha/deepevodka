@@ -47,6 +47,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -54,7 +55,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
 ]
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -138,7 +138,7 @@ USE_TZ = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-LOGIN_URL = '/'
+LOGIN_URL = '/login/'
 
 STATIC_URL = '/static/'
 
@@ -146,4 +146,8 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [ BASE_DIR / "static" ]
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'veiculos/fotos') #'veiculos' / 'fotos'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+SESSION_COOKIE_AGE = 3600               # sessão expira após 1 hora
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # expira ao fechar o browser
+SESSION_COOKIE_SECURE = not DEBUG       # HTTPS only em produção

@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-7">
+        <h1 class="dvk-page-title mb-4">Editar Evento</h1>
+
+        <form method="POST" enctype="multipart/form-data" class="dvk-form">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <div class="dvk-actions mt-3">
+                <button type="submit" class="btn dvk-btn-primary">Salvar</button>
+                <a href="{% url 'listar-eventos' %}" class="btn dvk-btn-outline">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

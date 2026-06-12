@@ -16,15 +16,23 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.views.generic import TemplateView, RedirectView
 from login.views import *
-from django.conf.urls.static import static  
-#from django.conf import settings
+from django.conf.urls.static import static
+
+
+class SobreView(TemplateView):
+    template_name = 'sobre.html'
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', login_view.as_view(), name='login'),
+    path('', RedirectView.as_view(url='/eventos/', permanent=False)),
+    path('login/', login_view.as_view(), name='login'),
+    path('cadastro/', CadastroView.as_view(), name='cadastro'),
     path('Logout/', Logout.as_view(), name='logout'),
-    path('veiculos/', include('veiculos.urls')),
-    path('autenticacao-api/', LoginAPI.as_view()),  # Para autenticação da API
-]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    path('sobre/', SobreView.as_view(), name='sobre'),
+    path('eventos/', include('veiculos.urls')),
+    path('autenticacao-api/', LoginAPI.as_view()),
+    path('cadastro-api/', CadastroAPI.as_view()),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

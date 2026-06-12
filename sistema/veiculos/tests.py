@@ -1,67 +1,113 @@
 from django.test import TestCase, Client
-from django.urls import reverse
-from veiculos.models import *
-from veiculos.forms import *
-from datetime import datetime
 from django.contrib.auth.models import User
+from django.urls import reverse
+from rest_framework.test import APIClient
+from rest_framework.authtoken.models import Token
+from veiculos.models import Evento
+import datetime
 
-class TestesModelVeiculo(TestCase):
+
+class EventoModelTest(TestCase):
+
     def setUp(self):
-        self.veiculo = Veiculo.objects.create(
-            marca=1,
-            modelo='Fusca',
-            ano=datetime.now().year,
-            cor=2,
-            combustivel=3
+        self.evento = Evento.objects.create(
+            nome='Show de Verão',
+            data=datetime.date(2026, 12, 31),
+            hora=datetime.time(22, 0),
+            local='Clube XYZ',
+            descricao='Grande festa de fim de ano.',
+            capacidade=500,
         )
 
-    def test_is_new(self):
-        self.assertTrue(self.veiculo.veiculo_novo)
-        self.veiculo.ano = datetime.now().year - 5
-        self.assertFalse(self.veiculo.veiculo_novo)
+    def test_criacao_evento(self):
+        self.assertEqual(self.evento.nome, 'Show de Verão')
+        self.assertEqual(self.evento.local, 'Clube XYZ')
+        self.assertEqual(self.evento.capacidade, 500)
 
-    def test_anos_de_uso(self):
-        # 1. Garante que o carro novo (criado no setUp com o ano atual) tem 0 anos de uso
-        self.assertEqual(self.veiculo.anos_de_uso(), 0)
-        
-        # 2. Envelhece o carro em 10 anos
-        self.veiculo.ano = datetime.now().year - 10
-        self.veiculo.save() # Salva no banco de dados temporário
-        
-        # 3. Agora testa se o método calcula corretamente os 10 anos
-        self.assertEqual(self.veiculo.anos_de_uso(), 10)
+    def test_str_evento(self):
+        self.assertEqual(str(self.evento), 'Show de Verão - 2026-12-31')
 
-class TestesViewListarVeiculo(TestCase):
+    def test_evento_sem_banner(self):
+        self.assertFalse(self.evento.banner)
+
+    def test_evento_sem_link_ingresso(self):
+        self.assertIsNone(self.evento.link_ingresso)
+
+    def test_ordenacao_por_data(self):
+        evento_anterior = Evento.objects.create(
+            nome='Festa Anterior',
+            data=datetime.date(2026, 6, 1),
+            hora=datetime.time(20, 0),
+            local='Bar ABC',
+        )
+        eventos = list(Evento.objects.all())
+        self.assertEqual(eventos[0], evento_anterior)
+        self.assertEqual(eventos[1], self.evento)
+
+
+class EventoViewListarTest(TestCase):
+
     def setUp(self):
         self.client = Client()
         self.user = User.objects.create_user(username='testuser', password='12345')
         self.client.force_login(self.user)
-        self.url = reverse('listar-veiculos')
-        self.veiculo = Veiculo.objects.create(
-            marca=1,
-            modelo='Fusca',
-            ano=datetime.now().year,
-            cor=2,
-            combustivel=3
+        self.url = reverse('listar-eventos')
+        self.evento = Evento.objects.create(
+            nome='Evento Teste',
+            data=datetime.date(2026, 12, 31),
+            hora=datetime.time(22, 0),
+            local='Local Teste',
         )
 
     def test_get(self):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.context.get('veiculos')), 1) # Corrigido .get[] para .get()
+        self.assertEqual(len(response.context.get('eventos')), 1)
 
-class TestesViewCriarVeiculos(TestCase):
+    def test_acesso_publico(self):
+        self.client.logout()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+
+
+class EventoViewDetalheTest(TestCase):
+
     def setUp(self):
         self.client = Client()
         self.user = User.objects.create_user(username='testuser', password='12345')
         self.client.force_login(self.user)
-        self.url = reverse('criar-veiculos')
+        self.evento = Evento.objects.create(
+            nome='Evento Detalhe',
+            data=datetime.date(2026, 12, 31),
+            hora=datetime.time(22, 0),
+            local='Local Detalhe',
+        )
+        self.url = reverse('detalhe-evento', kwargs={'pk': self.evento.pk})
+
+    def test_get(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Evento Detalhe')
+
+    def test_acesso_publico(self):
+        self.client.logout()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+
+
+class EventoViewCriarTest(TestCase):
+
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(username='testuser', password='12345')
+        self.client.force_login(self.user)
+        self.url = reverse('criar-evento')
         self.form_data = {
-            'marca': 1,
-            'modelo': 'Fusca',
-            'ano': datetime.now().year,
-            'cor': 2,
-            'combustivel': 3
+            'nome': 'Novo Evento',
+            'data': '2026-12-31',
+            'hora': '22:00',
+            'local': 'Algum Local',
+            'descricao': '',
         }
 
     def test_get(self):
@@ -69,35 +115,32 @@ class TestesViewCriarVeiculos(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_post(self):
-        # O Django CreateView espera um POST. Aqui estamos simulando o envio do formulário
         response = self.client.post(self.url, data=self.form_data)
-        
         self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse('listar-veiculos'))
+        self.assertRedirects(response, reverse('listar-eventos'))
+        self.assertEqual(Evento.objects.count(), 1)
+        self.assertEqual(Evento.objects.first().nome, 'Novo Evento')
 
-        # Como criamos 1 veículo com o form_data, verificamos se ele está no banco
-        self.assertEqual(Veiculo.objects.count(), 1)
-        self.assertEqual(Veiculo.objects.first().modelo, 'Fusca')
 
-class TestesViewEditarVeiculos(TestCase):
+class EventoViewEditarTest(TestCase):
+
     def setUp(self):
         self.client = Client()
         self.user = User.objects.create_user(username='testuser', password='12345')
         self.client.force_login(self.user)
-        self.veiculo = Veiculo.objects.create(
-            marca=1,
-            modelo='Kombi', # Nome original do carro
-            ano=datetime.now().year,
-            cor=2,
-            combustivel=3
+        self.evento = Evento.objects.create(
+            nome='Evento Original',
+            data=datetime.date(2026, 12, 31),
+            hora=datetime.time(22, 0),
+            local='Local Original',
         )
-        self.url = reverse('editar-veiculos', kwargs={'pk': self.veiculo.pk})
+        self.url = reverse('editar-evento', kwargs={'pk': self.evento.pk})
         self.form_data = {
-            'marca': 1,
-            'modelo': 'Fusca', # Novo nome que queremos alterar
-            'ano': datetime.now().year,
-            'cor': 2,
-            'combustivel': 3
+            'nome': 'Evento Editado',
+            'data': '2026-12-31',
+            'hora': '23:00',
+            'local': 'Novo Local',
+            'descricao': '',
         }
 
     def test_get(self):
@@ -106,45 +149,76 @@ class TestesViewEditarVeiculos(TestCase):
 
     def test_post(self):
         response = self.client.post(self.url, data=self.form_data)
-        
         self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse('listar-veiculos'))
+        self.assertRedirects(response, reverse('listar-eventos'))
+        self.evento.refresh_from_db()
+        self.assertEqual(self.evento.nome, 'Evento Editado')
 
-        veiculo_atualizado = Veiculo.objects.get(id=self.veiculo.id)
-        self.assertEqual(veiculo_atualizado.modelo, 'Fusca')
 
-class TestesViewExcluirVeiculos(TestCase):
+class EventoViewExcluirTest(TestCase):
+
     def setUp(self):
         self.client = Client()
-        # Cria um usuário e faz login (necessário se a view usar LoginRequiredMixin)
         self.user = User.objects.create_user(username='testuser', password='12345')
         self.client.force_login(self.user)
-        
-        # Cria um veículo no banco de dados de teste
-        self.veiculo = Veiculo.objects.create(
-            marca=1,
-            modelo='Opala',
-            ano=1978,
-            cor=2,
-            combustivel=3
+        self.evento = Evento.objects.create(
+            nome='Evento para Excluir',
+            data=datetime.date(2026, 12, 31),
+            hora=datetime.time(22, 0),
+            local='Local',
         )
-        # Monta a URL passando a chave primária (pk) do veículo recém-criado
-        self.url = reverse('excluir-veiculos', kwargs={'pk': self.veiculo.pk})
+        self.url = reverse('excluir-evento', kwargs={'pk': self.evento.pk})
 
     def test_get(self):
-        # Testa se a página de confirmação de exclusão abre corretamente
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
 
     def test_post(self):
-        # Dispara um POST para confirmar a exclusão
         response = self.client.post(self.url)
-        
-        # O DeleteView padrão redireciona após o sucesso (status 302)
         self.assertEqual(response.status_code, 302)
-        
-        # Verifica se redirecionou para a página correta 
-        self.assertRedirects(response, reverse('listar-veiculos'))
-        
-        # Verifica no banco de dados se a contagem de veículos agora é zero
-        self.assertEqual(Veiculo.objects.count(), 0)
+        self.assertRedirects(response, reverse('listar-eventos'))
+        self.assertEqual(Evento.objects.count(), 0)
+
+
+class EventoAPITest(TestCase):
+
+    def setUp(self):
+        self.client = APIClient()
+        self.usuario = User.objects.create_user(username='apiuser', password='senha123')
+        self.token = Token.objects.create(user=self.usuario)
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {self.token.key}')
+        self.evento = Evento.objects.create(
+            nome='Evento API',
+            data=datetime.date(2026, 12, 31),
+            hora=datetime.time(22, 0),
+            local='Local API',
+        )
+
+    def test_api_listar_eventos(self):
+        response = self.client.get(reverse('api-listar-eventos'))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+
+    def test_api_acesso_publico(self):
+        self.client.credentials()
+        response = self.client.get(reverse('api-listar-eventos'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_api_detalhe_evento(self):
+        response = self.client.get(reverse('api-detalhe-evento', args=[self.evento.id]))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['nome'], 'Evento API')
+
+    def test_api_atualizar_evento(self):
+        response = self.client.patch(
+            reverse('api-detalhe-evento', args=[self.evento.id]),
+            {'nome': 'Evento Atualizado'},
+            format='json'
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['nome'], 'Evento Atualizado')
+
+    def test_api_deletar_evento(self):
+        response = self.client.delete(reverse('api-detalhe-evento', args=[self.evento.id]))
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(Evento.objects.count(), 0)

@@ -1,0 +1,183 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deep&amp;Vodka® — Criar Conta</title>
+    <link rel="icon" href="{% static 'assets/dpvk.png' %}" type="image/png">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: #0d0d12;
+            color: #fff;
+            font-family: Arial, Helvetica, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .login-card {
+            background-color: #1c1c26;
+            border: 1px solid #2a2a3a;
+            border-radius: 12px;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .login-brand {
+            text-align: center;
+            font-size: 2.4rem;
+            font-weight: 900;
+            letter-spacing: -2px;
+            text-transform: uppercase;
+            margin-bottom: 0.2rem;
+            line-height: 1;
+        }
+
+        .login-sub {
+            text-align: center;
+            color: #555566;
+            font-size: 0.7rem;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            margin-bottom: 2rem;
+        }
+
+        .dvk-red { color: #cc0033; }
+
+        label {
+            color: #888899;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            display: block;
+            margin-bottom: 0.4rem;
+        }
+
+        .dvk-input {
+            width: 100%;
+            background-color: #16161e;
+            border: 1px solid #2a2a3a;
+            border-radius: 6px;
+            color: #fff;
+            padding: 0.7rem 0.9rem;
+            margin-bottom: 1.1rem;
+            outline: none;
+            font-size: 0.95rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .dvk-input:focus {
+            border-color: #cc0033;
+            box-shadow: 0 0 0 3px rgba(204,0,51,0.12);
+        }
+
+        .dvk-hint {
+            color: #555566;
+            font-size: 0.68rem;
+            margin-top: -0.7rem;
+            margin-bottom: 1rem;
+            letter-spacing: 0.3px;
+        }
+
+        .btn-login {
+            width: 100%;
+            background-color: #cc0033;
+            border: none;
+            border-radius: 6px;
+            color: #fff;
+            font-weight: 900;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            padding: 0.8rem;
+            cursor: pointer;
+            transition: background-color 0.2s, box-shadow 0.2s, transform 0.15s;
+        }
+
+        .btn-login:hover {
+            background-color: #a80028;
+            box-shadow: 0 4px 16px rgba(204,0,51,0.25);
+            transform: translateY(-1px);
+        }
+
+        .dvk-alert {
+            background-color: rgba(204,0,51,0.1);
+            border: 1px solid rgba(204,0,51,0.4);
+            border-radius: 6px;
+            color: #ff6677;
+            padding: 0.75rem 1rem;
+            margin-top: 1.25rem;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
+        .dvk-links {
+            text-align: center;
+            margin-top: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .dvk-links a {
+            color: #888899;
+            font-size: 0.75rem;
+            text-decoration: none;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: color 0.2s;
+        }
+
+        .dvk-links a:hover { color: #ffffff; }
+
+        .dvk-links a.secondary {
+            color: #444455;
+        }
+
+        .dvk-links a.secondary:hover { color: #888899; }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <div class="login-brand">
+            DEEP<span class="dvk-red">&amp;</span>VODKA<sup style="font-size:0.45em; vertical-align:super;">®</sup>
+        </div>
+        <div class="login-sub">Criar Conta</div>
+
+        <form method="POST" action="{% url 'cadastro' %}">
+            {% csrf_token %}
+
+            <label for="username">Usuário *</label>
+            <input type="text" class="dvk-input" id="username" name="username" autocomplete="username" required>
+
+            <label for="email">E-mail</label>
+            <input type="email" class="dvk-input" id="email" name="email" autocomplete="email" placeholder="Opcional">
+
+            <label for="password">Senha *</label>
+            <input type="password" class="dvk-input" id="password" name="password" autocomplete="new-password" required>
+            <p class="dvk-hint">Mínimo 8 caracteres e pelo menos um especial (!@#$%...)</p>
+
+            <label for="confirmar">Confirmar Senha *</label>
+            <input type="password" class="dvk-input" id="confirmar" name="confirmar" autocomplete="new-password" required>
+
+            <button type="submit" class="btn-login">Criar Conta</button>
+        </form>
+
+        {% if mensagem %}
+        <div class="dvk-alert">{{ mensagem }}</div>
+        {% endif %}
+
+        <div class="dvk-links">
+            <a href="{% url 'login' %}">Já tem conta? Fazer login</a>
+            <a href="/eventos/" class="secondary">Ver eventos sem login</a>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+
+        <div class="dvk-sobre-header mb-5">
+            <img src="{% static 'assets/logo-deepvodka.png' %}" alt="Deep&Vodka" class="dvk-sobre-logo mb-4">
+            <h1 class="dvk-page-title">Sobre Nós</h1>
+        </div>
+
+        <div class="dvk-sobre-body">
+            <p>
+                Nascida nas noites de Araguaína através de encontros intimistas, a
+                <strong>Deep<span class="dvk-red">&amp;</span>Vodka</strong> evoluiu para se tornar
+                um pilar da cena eletrônica. O que começou como pequenas festas para quem realmente
+                entende de som, hoje é uma marca consolidada, agência de talentos e produtora de
+                eventos de vanguarda.
+            </p>
+
+            <p>
+                Respiramos música eletrônica em sua forma mais pura. Como produtora de DJs e
+                curadora de eventos exclusivos, nossa missão é conectar o público à batida perfeita,
+                transformando pistas de dança em experiências imersivas, seja em um sunset à
+                beira-lago ou em grandes palcos.
+            </p>
+
+            <div class="dvk-sobre-dna">
+                <span>Nosso DNA</span>
+                100% Música Eletrônica.<br>Sem concessões, apenas boas vibrações.
+            </div>
+        </div>
+
+        <div class="mt-4 pt-3" style="border-top: 1px solid var(--dvk-border);">
+            <a href="{% url 'listar-eventos' %}" class="dvk-hint-link">ver eventos</a>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

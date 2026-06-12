@@ -1,11 +1,18 @@
 from django.contrib import admin
+from .models import Evento, SetMusical
 
-from django.contrib import admin
-from .models import Veiculo
 
-class VeiculoAdmin(admin.ModelAdmin):
-    list_display = ['id', 'marca', 'modelo', 'cor', 'combustivel', 'foto']
-    search_fields = ['modelo']
-    
-admin.site.register(Veiculo, VeiculoAdmin)
-# Register your models here.
+@admin.register(Evento)
+class EventoAdmin(admin.ModelAdmin):
+    list_display = ['id', 'nome', 'data', 'hora', 'local', 'capacidade']
+    list_filter = ['data']
+    search_fields = ['nome', 'local']
+    ordering = ['data', 'hora']
+
+
+@admin.register(SetMusical)
+class SetAdmin(admin.ModelAdmin):
+    list_display = ['id', 'nome', 'tipo', 'data']
+    list_filter = ['tipo', 'data']
+    search_fields = ['nome']
+    ordering = ['-data', 'nome']

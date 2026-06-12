@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="dvk-page-title mb-0">Sets</h2>
+    {% if user.is_staff %}
+    <a href="{% url 'criar-set' %}" class="btn dvk-btn-primary">+ Novo Set</a>
+    {% endif %}
+</div>
+
+{% if not sets %}
+<p class="text-muted text-center mt-5" style="letter-spacing:2px; font-size:.8rem; text-transform:uppercase;">
+    Nenhum set disponível no momento.
+</p>
+{% endif %}
+
+<div class="row">
+{% for set in sets %}
+<div class="col-md-6 col-lg-4 mb-4">
+    <div class="dvk-set-card" data-tipo="{{ set.tipo }}" data-url="{{ set.url }}">
+        <div class="dvk-set-thumb">
+            <img class="dvk-set-img" src="" alt="{{ set.nome }}" />
+            <div class="dvk-set-overlay">
+                {% if set.tipo == 'youtube' %}
+                <span class="dvk-set-platform dvk-yt">▶ YouTube</span>
+                {% else %}
+                <span class="dvk-set-platform dvk-sc">☁ SoundCloud</span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="dvk-set-info">
+            <div class="dvk-set-nome">{{ set.nome }}</div>
+            {% if set.data %}
+            <div class="dvk-set-data">{{ set.data|date:"d/m/Y" }}</div>
+            {% endif %}
+            {% if set.descricao %}
+            <div class="dvk-set-desc">{{ set.descricao }}</div>
+            {% endif %}
+            <div class="dvk-set-footer mt-2">
+                <a href="{{ set.url }}" target="_blank" rel="noopener noreferrer" class="dvk-hint-link stretched-link">
+                    assistir / ouvir
+                </a>
+                {% if user.is_staff %}
+                <a href="{% url 'excluir-set' set.id %}" class="btn dvk-btn-danger btn-sm dvk-set-excluir">
+                    Excluir
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.dvk-set-card').forEach(function(card) {
+        const url  = card.dataset.url;
+        const tipo = card.dataset.tipo;
+        const img  = card.querySelector('.dvk-set-img');
+
+        if (tipo === 'youtube') {
+            const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&?/]+)/);
+            if (match) {
+                img.src = 'https://img.youtube.com/vi/' + match[1] + '/hqdefault.jpg';
+            }
+        } else if (tipo === 'soundcloud') {
+            fetch('https://soundcloud.com/oembed?url=' + encodeURIComponent(url) + '&format=json')
+                .then(function(r) { return r.json(); })
+                .then(function(d) { if (d.thumbnail_url) img.src = d.thumbnail_url; })
+                .catch(function() {});
+        }
+    });
+});
+</script>
+
+<style>
+.dvk-set-card {
+    position: relative;
+    cursor: pointer;
+    background: #1c1c26;
+    border: 1px solid #2a2a3a;
+    border-radius: 10px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.dvk-set-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(204,0,51,0.35);
+}
+.dvk-set-thumb { position: relative; width: 100%; padding-top: 56.25%; background: #16161e; overflow: hidden; }
+.dvk-set-img   { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
+.dvk-set-overlay { position: absolute; bottom: 0; left: 0; right: 0; padding: 6px 10px; background: linear-gradient(transparent, rgba(0,0,0,.7)); }
+.dvk-set-platform { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; }
+.dvk-yt { color: #ff4444; }
+.dvk-sc { color: #ff7700; }
+.dvk-set-info  { padding: 14px 16px 16px; }
+.dvk-set-nome  { color: #fff; font-weight: 700; font-size: .95rem; text-transform: uppercase; letter-spacing: 1px; }
+.dvk-set-data  { color: #555566; font-size: .75rem; margin-top: 4px; }
+.dvk-set-desc  { color: #888899; font-size: .82rem; margin-top: 8px; line-height: 1.5; }
+.dvk-set-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #2a2a3a; padding-top: 10px; }
+.dvk-set-excluir { position: relative; z-index: 2; font-size: .72rem; letter-spacing: 1.5px; }
+</style>
+
+{% endblock %}

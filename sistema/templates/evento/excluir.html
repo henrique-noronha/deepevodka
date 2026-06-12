@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <h1 class="dvk-page-title mb-3">Excluir Evento</h1>
+        <p class="dvk-confirm-text">
+            Tem certeza que deseja excluir <strong>{{ object.nome }}</strong>?<br>
+            <small>Esta ação não pode ser desfeita.</small>
+        </p>
+
+        <form method="POST">
+            {% csrf_token %}
+            <div class="dvk-actions">
+                <button type="submit" class="btn dvk-btn-danger">Confirmar Exclusão</button>
+                <a href="{% url 'listar-eventos' %}" class="btn dvk-btn-outline">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
